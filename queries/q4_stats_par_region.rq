@@ -1,0 +1,19 @@
+# Q4 — Statistiques par région : nombre de plats, temps moyen, plats végétariens
+# Question métier : Quelle région est la plus représentée et ses plats sont-ils longs à préparer ?
+# Notions SPARQL : GROUP BY, COUNT, AVG, ROUND, SUM + IF, ORDER BY DESC
+# Effet de l'inférence : aucun (gt:originaireDe et gt:tempsPreparation sont écrits explicitement).
+
+PREFIX gt:   <http://example.org/gastronomie-tn/ontologie#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?region ?nom (COUNT(?plat) AS ?nbPlats) (ROUND(AVG(?temps)) AS ?tempsMoyen)
+       (SUM(IF(?vege, 1, 0)) AS ?nbVegetariens)
+WHERE {
+  ?plat gt:originaireDe ?region ;
+        gt:tempsPreparation ?temps ;
+        gt:estVegetarien ?vege .
+  ?region rdfs:label ?nom .
+  FILTER (lang(?nom) = "fr")
+}
+GROUP BY ?region ?nom
+ORDER BY DESC(?nbPlats) ?nom

@@ -1,0 +1,20 @@
+# Q2 — Plats végétariens prêts en 45 minutes maximum
+# Question métier : Je suis végétarien et pressé : que puis-je cuisiner ?
+# Notions SPARQL : VALUES (paramètre), FILTER booléen et numérique, OPTIONAL
+# Effet de l'inférence : aucun (estVegetarien et tempsPreparation sont écrits explicitement).
+# Paramètre : ?max (45 par défaut). L'API remplace cette valeur par ?max_temps=...
+
+PREFIX gt:      <http://example.org/gastronomie-tn/ontologie#>
+PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+
+SELECT ?plat ?nom ?tempsPreparation ?description
+WHERE {
+  VALUES ?max { 45 }
+  ?plat gt:estVegetarien true ;
+        gt:tempsPreparation ?tempsPreparation ;
+        rdfs:label ?nom .
+  OPTIONAL { ?plat dcterms:description ?description }
+  FILTER (?tempsPreparation <= ?max && lang(?nom) = "fr")
+}
+ORDER BY ?tempsPreparation

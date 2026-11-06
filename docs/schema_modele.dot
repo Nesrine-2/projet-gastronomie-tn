@@ -1,0 +1,64 @@
+// Schéma graphique du modèle RDFS — Gastronomie tunisienne
+// Générer l'image :  dot -Tpng docs/schema_modele.dot -o docs/schema_modele.png
+// (ou coller ce texte sur https://dreampuf.github.io/GraphvizOnline )
+digraph Modele {
+  graph [rankdir=BT, fontname="Helvetica", fontsize=12, nodesep=0.6, ranksep=0.9, forcelabels=true,
+         label="Modèle RDFS — Gastronomie tunisienne (gt:)", labelloc=t, fontsize=18, pad=0.3];
+  node  [fontname="Helvetica", fontsize=11, style="filled,rounded", shape=box];
+  edge  [fontname="Helvetica", fontsize=10];
+
+  // ---- Classes gt: ----
+  node [fillcolor="#FDE7C8", color="#C0762B"];
+  Plat [label="gt:Plat"]; Entree [label="gt:Entree"]; Soupe [label="gt:Soupe"];
+  PlatPrincipal [label="gt:PlatPrincipal"]; Dessert [label="gt:Dessert"]; Patisserie [label="gt:Patisserie"];
+
+  node [fillcolor="#DDEFD8", color="#4C8B3F"];
+  Ingredient [label="gt:Ingredient"]; Cereale [label="gt:Cereale"]; Legume [label="gt:Legume"];
+  Epice [label="gt:Epice"]; Viande [label="gt:Viande"]; Poisson [label="gt:Poisson"];
+
+  node [fillcolor="#DCE6F5", color="#3D64A8"];
+  Chef [label="gt:Chef"]; Region [label="gt:Region"];
+
+  // ---- Classe externe (FOAF) ----
+  Person [label="foaf:Person\n(vocabulaire externe)", fillcolor="#EADCF2", color="#7A4C9C"];
+
+  // ---- Types de données ----
+  node [shape=note, style=filled, fillcolor="#F2F2F2", color="#888888", fontsize=10];
+  Int1 [label="xsd:integer"]; Int2 [label="xsd:integer"]; Str [label="xsd:string"];
+  Bool [label="xsd:boolean"]; Str2 [label="xsd:string"];
+
+  // ---- rdfs:subClassOf (flèche creuse) ----
+  edge [arrowhead=onormal, color="#555555", style=solid, label=""];
+  Entree -> Plat; PlatPrincipal -> Plat; Dessert -> Plat;
+  Soupe -> Entree; Patisserie -> Dessert;
+  Cereale -> Ingredient; Legume -> Ingredient; Epice -> Ingredient;
+  Viande -> Ingredient; Poisson -> Ingredient;
+  Chef -> Person;
+
+  // ---- Propriétés d'objet (domain -> range) ----
+  edge [arrowhead=normal, color="#B03A2E", fontcolor="#B03A2E", constraint=false];
+  Plat -> Ingredient [label="gt:contientIngredient", constraint=true];
+  Plat -> Ingredient [xlabel="gt:ingredientPrincipal\n(sous-propriété)", style=dashed];
+  Plat -> Epice      [xlabel="gt:epiceUtilisee\n(sous-propriété)", style=dashed];
+  Plat -> Region     [label="gt:originaireDe"];
+  Chef -> Plat       [label="gt:specialite"];
+  Person -> Region   [label="foaf:based_near", color="#7A4C9C", fontcolor="#7A4C9C"];
+
+  // ---- Propriétés de données ----
+  edge [color="#666666", fontcolor="#444444", style=solid, constraint=true];
+  Int1 -> Plat [dir=back, label="gt:tempsPreparation"];
+  Int2 -> Plat [dir=back, label="gt:nombrePersonnes"];
+  Str  -> Plat [dir=back, label="gt:difficulte"];
+  Bool -> Plat [dir=back, label="gt:estVegetarien"];
+  Str2 -> Person [dir=back, label="foaf:name"];
+
+  // ---- Légende ----
+  subgraph cluster_legende {
+    label="Légende"; fontsize=11; style=rounded; color="#BBBBBB";
+    node [shape=plaintext, style="", fontsize=10];
+    l1 [label="── ▷  rdfs:subClassOf"];
+    l2 [label="──▶  propriété (domain → range)"];
+    l3 [label="- - ▶  sous-propriété (rdfs:subPropertyOf)"];
+    l1 -> l2 -> l3 [style=invis];
+  }
+}

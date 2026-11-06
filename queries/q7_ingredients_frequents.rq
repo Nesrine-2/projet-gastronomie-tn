@@ -1,0 +1,18 @@
+# Q7 — Ingrédients utilisés dans au moins 3 plats
+# Question métier : Quels produits faut-il toujours avoir dans une cuisine tunisienne ?
+# Notions SPARQL : VALUES (paramètre), COUNT(DISTINCT), GROUP BY, HAVING
+# Effet de l'inférence : les ingrédients principaux et les épices deviennent aussi des gt:contientIngredient (règle rdfs7). Sans inférence : 7 ingrédients. Avec inférence : 12 (Harissa, Semoule, Poivron, Tabel, Carvi apparaissent).
+# Paramètre : ?min (3 par défaut). L'API remplace cette valeur par ?min=...
+
+PREFIX gt:   <http://example.org/gastronomie-tn/ontologie#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?ingredient ?nom (COUNT(DISTINCT ?plat) AS ?nbPlats)
+WHERE {
+  VALUES ?min { 3 }
+  ?plat gt:contientIngredient ?ingredient .
+  ?ingredient rdfs:label ?nom .
+}
+GROUP BY ?ingredient ?nom ?min
+HAVING (COUNT(DISTINCT ?plat) >= ?min)
+ORDER BY DESC(?nbPlats) ?nom

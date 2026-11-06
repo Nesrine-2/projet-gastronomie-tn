@@ -1,0 +1,140 @@
+# =====================================================================
+#  ONTOLOGIE (schéma RDFS) — Gastronomie tunisienne
+#  Fichier : data/ontologie.ttl
+#  Rôle    : définit le VOCABULAIRE (classes + propriétés).
+#            Les données (plats, ingrédients...) sont dans donnees.ttl
+# =====================================================================
+
+@prefix gt:      <http://example.org/gastronomie-tn/ontologie#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix foaf:    <http://xmlns.com/foaf/0.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+# ---------------------------------------------------------------------
+# 1. CLASSES
+# ---------------------------------------------------------------------
+
+# --- Hiérarchie des plats (2 niveaux -> permet la transitivité R3) ---
+gt:Plat a rdfs:Class ;
+    rdfs:label "Plat"@fr ;
+    rdfs:comment "Une recette / un plat de la cuisine tunisienne."@fr .
+
+gt:Entree a rdfs:Class ;
+    rdfs:subClassOf gt:Plat ;
+    rdfs:label "Entrée"@fr .
+
+gt:Soupe a rdfs:Class ;
+    rdfs:subClassOf gt:Entree ;          # Soupe -> Entree -> Plat
+    rdfs:label "Soupe"@fr .
+
+gt:PlatPrincipal a rdfs:Class ;
+    rdfs:subClassOf gt:Plat ;
+    rdfs:label "Plat principal"@fr .
+
+gt:Dessert a rdfs:Class ;
+    rdfs:subClassOf gt:Plat ;
+    rdfs:label "Dessert"@fr .
+
+gt:Patisserie a rdfs:Class ;
+    rdfs:subClassOf gt:Dessert ;         # Patisserie -> Dessert -> Plat
+    rdfs:label "Pâtisserie"@fr .
+
+# --- Hiérarchie des ingrédients ---
+gt:Ingredient a rdfs:Class ;
+    rdfs:label "Ingrédient"@fr ;
+    rdfs:comment "Produit utilisé dans la préparation d'un plat."@fr .
+
+gt:Cereale a rdfs:Class ; rdfs:subClassOf gt:Ingredient ; rdfs:label "Céréale"@fr .
+gt:Legume  a rdfs:Class ; rdfs:subClassOf gt:Ingredient ; rdfs:label "Légume"@fr .
+gt:Epice   a rdfs:Class ; rdfs:subClassOf gt:Ingredient ; rdfs:label "Épice / condiment"@fr .
+gt:Viande  a rdfs:Class ; rdfs:subClassOf gt:Ingredient ; rdfs:label "Viande"@fr .
+gt:Poisson a rdfs:Class ; rdfs:subClassOf gt:Ingredient ; rdfs:label "Poisson"@fr .
+
+# --- Personnes : réutilisation de FOAF ---
+foaf:Person a rdfs:Class ;
+    rdfs:label "Personne (FOAF)"@fr .
+
+gt:Chef a rdfs:Class ;
+    rdfs:subClassOf foaf:Person ;        # un Chef est une foaf:Person
+    rdfs:label "Chef cuisinier"@fr .
+
+# --- Origine géographique ---
+gt:Region a rdfs:Class ;
+    rdfs:label "Région (gouvernorat)"@fr .
+
+# ---------------------------------------------------------------------
+# 2. PROPRIÉTÉS D'OBJET (relient deux ressources)
+# ---------------------------------------------------------------------
+
+gt:contientIngredient a rdf:Property ;
+    rdfs:label "contient l'ingrédient"@fr ;
+    rdfs:domain gt:Plat ;
+    rdfs:range  gt:Ingredient .
+
+# Sous-propriété n°1 : l'ingrédient principal EST AUSSI un ingrédient contenu
+gt:ingredientPrincipal a rdf:Property ;
+    rdfs:subPropertyOf gt:contientIngredient ;
+    rdfs:label "ingrédient principal"@fr ;
+    rdfs:domain gt:Plat ;
+    rdfs:range  gt:Ingredient .
+
+# Sous-propriété n°2 : une épice utilisée EST AUSSI un ingrédient contenu
+gt:epiceUtilisee a rdf:Property ;
+    rdfs:subPropertyOf gt:contientIngredient ;
+    rdfs:label "épice utilisée"@fr ;
+    rdfs:domain gt:Plat ;
+    rdfs:range  gt:Epice .
+
+gt:originaireDe a rdf:Property ;
+    rdfs:label "originaire de"@fr ;
+    rdfs:domain gt:Plat ;
+    rdfs:range  gt:Region .
+
+gt:specialite a rdf:Property ;
+    rdfs:label "a pour spécialité"@fr ;
+    rdfs:domain gt:Chef ;                # celui qui a une spécialité est un Chef
+    rdfs:range  gt:Plat .
+
+# ---------------------------------------------------------------------
+# 3. PROPRIÉTÉS DE DONNÉES (relient une ressource à une valeur)
+# ---------------------------------------------------------------------
+
+gt:tempsPreparation a rdf:Property ;
+    rdfs:label "temps de préparation (minutes)"@fr ;
+    rdfs:domain gt:Plat ;
+    rdfs:range  xsd:integer .
+
+gt:nombrePersonnes a rdf:Property ;
+    rdfs:label "nombre de personnes"@fr ;
+    rdfs:domain gt:Plat ;
+    rdfs:range  xsd:integer .
+
+gt:difficulte a rdf:Property ;
+    rdfs:label "difficulté"@fr ;
+    rdfs:comment "Valeurs : Facile, Moyenne, Difficile"@fr ;
+    rdfs:domain gt:Plat ;
+    rdfs:range  xsd:string .
+
+gt:estVegetarien a rdf:Property ;
+    rdfs:label "est végétarien"@fr ;
+    rdfs:domain gt:Plat ;
+    rdfs:range  xsd:boolean .
+
+# ---------------------------------------------------------------------
+# 4. PROPRIÉTÉS RÉUTILISÉES (vocabulaires externes)
+#    foaf:name, foaf:based_near (FOAF), dcterms:description (Dublin Core),
+#    rdfs:label, rdfs:seeAlso (RDFS -> lien vers DBpedia)
+#    On les déclare simplement, SANS changer leur définition d'origine
+#    (on ne redéfinit pas le domain/range d'un vocabulaire qui n'est pas à nous).
+# ---------------------------------------------------------------------
+
+foaf:name a rdf:Property ;
+    rdfs:label "nom"@fr .
+
+foaf:based_near a rdf:Property ;
+    rdfs:label "basé près de"@fr .
+
+dcterms:description a rdf:Property ;
+    rdfs:label "description"@fr .

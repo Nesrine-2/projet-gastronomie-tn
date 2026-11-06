@@ -1,0 +1,575 @@
+@prefix dbr: <http://dbpedia.org/resource/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix gt: <http://example.org/gastronomie-tn/ontologie#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix res: <http://example.org/gastronomie-tn/ressource/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+gt:Cereale a rdfs:Class ;
+    rdfs:label "Céréale"@fr ;
+    rdfs:subClassOf gt:Ingredient .
+
+gt:Chef a rdfs:Class ;
+    rdfs:label "Chef cuisinier"@fr ;
+    rdfs:subClassOf foaf:Person .
+
+gt:Dessert a rdfs:Class ;
+    rdfs:label "Dessert"@fr ;
+    rdfs:subClassOf gt:Plat .
+
+gt:Entree a rdfs:Class ;
+    rdfs:label "Entrée"@fr ;
+    rdfs:subClassOf gt:Plat .
+
+gt:Epice a rdfs:Class ;
+    rdfs:label "Épice / condiment"@fr ;
+    rdfs:subClassOf gt:Ingredient .
+
+gt:Ingredient a rdfs:Class ;
+    rdfs:label "Ingrédient"@fr ;
+    rdfs:comment "Produit utilisé dans la préparation d'un plat."@fr .
+
+gt:Legume a rdfs:Class ;
+    rdfs:label "Légume"@fr ;
+    rdfs:subClassOf gt:Ingredient .
+
+gt:Patisserie a rdfs:Class ;
+    rdfs:label "Pâtisserie"@fr ;
+    rdfs:subClassOf gt:Dessert,
+        gt:Plat .
+
+gt:Plat a rdfs:Class ;
+    rdfs:label "Plat"@fr ;
+    rdfs:comment "Une recette / un plat de la cuisine tunisienne."@fr .
+
+gt:PlatPrincipal a rdfs:Class ;
+    rdfs:label "Plat principal"@fr ;
+    rdfs:subClassOf gt:Plat .
+
+gt:Poisson a rdfs:Class ;
+    rdfs:label "Poisson"@fr ;
+    rdfs:subClassOf gt:Ingredient .
+
+gt:Region a rdfs:Class ;
+    rdfs:label "Région (gouvernorat)"@fr .
+
+gt:Soupe a rdfs:Class ;
+    rdfs:label "Soupe"@fr ;
+    rdfs:subClassOf gt:Entree,
+        gt:Plat .
+
+gt:Viande a rdfs:Class ;
+    rdfs:label "Viande"@fr ;
+    rdfs:subClassOf gt:Ingredient .
+
+foaf:Person a rdfs:Class ;
+    rdfs:label "Personne (FOAF)"@fr .
+
+gt:difficulte a rdf:Property ;
+    rdfs:label "difficulté"@fr ;
+    rdfs:comment "Valeurs : Facile, Moyenne, Difficile"@fr ;
+    rdfs:domain gt:Plat ;
+    rdfs:range xsd:string .
+
+gt:epiceUtilisee a rdf:Property ;
+    rdfs:label "épice utilisée"@fr ;
+    rdfs:domain gt:Plat ;
+    rdfs:range gt:Epice ;
+    rdfs:subPropertyOf gt:contientIngredient .
+
+gt:estVegetarien a rdf:Property ;
+    rdfs:label "est végétarien"@fr ;
+    rdfs:domain gt:Plat ;
+    rdfs:range xsd:boolean .
+
+gt:ingredientPrincipal a rdf:Property ;
+    rdfs:label "ingrédient principal"@fr ;
+    rdfs:domain gt:Plat ;
+    rdfs:range gt:Ingredient ;
+    rdfs:subPropertyOf gt:contientIngredient .
+
+gt:nombrePersonnes a rdf:Property ;
+    rdfs:label "nombre de personnes"@fr ;
+    rdfs:domain gt:Plat ;
+    rdfs:range xsd:integer .
+
+gt:originaireDe a rdf:Property ;
+    rdfs:label "originaire de"@fr ;
+    rdfs:domain gt:Plat ;
+    rdfs:range gt:Region .
+
+gt:specialite a rdf:Property ;
+    rdfs:label "a pour spécialité"@fr ;
+    rdfs:domain gt:Chef ;
+    rdfs:range gt:Plat .
+
+gt:tempsPreparation a rdf:Property ;
+    rdfs:label "temps de préparation (minutes)"@fr ;
+    rdfs:domain gt:Plat ;
+    rdfs:range xsd:integer .
+
+res:AmiraBenSalem a gt:Chef,
+        foaf:Person ;
+    gt:specialite res:CouscousPoisson,
+        res:Makroudh ;
+    foaf:based_near res:Sfax ;
+    foaf:name "Amira Ben Salem" .
+
+res:AssidaZgougou a gt:Dessert,
+        gt:Plat ;
+    rdfs:label "عصيدة الزقوقو"@ar,
+        "Assidat zgougou"@fr ;
+    gt:contientIngredient res:Farine,
+        res:Lait,
+        res:Sucre,
+        res:Zgougou ;
+    gt:difficulte "Difficile" ;
+    gt:estVegetarien true ;
+    gt:ingredientPrincipal res:Zgougou ;
+    gt:nombrePersonnes 8 ;
+    gt:originaireDe res:Tunis ;
+    gt:tempsPreparation 180 ;
+    dcterms:description "Crème de graines de pin d'Alep, préparée pour le Mouled."@fr .
+
+res:Bambalouni a gt:Dessert,
+        gt:Patisserie,
+        gt:Plat ;
+    rdfs:label "بمبالوني"@ar,
+        "Bambalouni"@fr ;
+    gt:contientIngredient res:Farine,
+        res:Levure,
+        res:Sucre ;
+    gt:difficulte "Moyenne" ;
+    gt:estVegetarien true ;
+    gt:ingredientPrincipal res:Farine ;
+    gt:nombrePersonnes 6 ;
+    gt:originaireDe res:Tunis ;
+    gt:tempsPreparation 120 ;
+    dcterms:description "Beignet frit saupoudré de sucre, spécialité de Sidi Bou Saïd."@fr .
+
+res:ChorbaFrik a gt:Entree,
+        gt:Plat,
+        gt:Soupe ;
+    rdfs:label "شربة فريك"@ar,
+        "Chorba frik"@fr ;
+    gt:contientIngredient res:Agneau,
+        res:Frik,
+        res:Harissa,
+        res:Oignon,
+        res:PoisChiches,
+        res:Tabel,
+        res:Tomate ;
+    gt:difficulte "Moyenne" ;
+    gt:epiceUtilisee res:Harissa,
+        res:Tabel ;
+    gt:estVegetarien false ;
+    gt:ingredientPrincipal res:Frik ;
+    gt:nombrePersonnes 6 ;
+    gt:originaireDe res:Tunis ;
+    gt:tempsPreparation 60 ;
+    dcterms:description "Soupe au blé vert concassé et à l'agneau, typique du Ramadan."@fr .
+
+res:CouscousAgneau a gt:Plat,
+        gt:PlatPrincipal ;
+    rdfs:label "كسكسي بالعلوش"@ar,
+        "Couscous à l'agneau"@fr ;
+    gt:contientIngredient res:Agneau,
+        res:Carvi,
+        res:Courgette,
+        res:Harissa,
+        res:PoisChiches,
+        res:PommeDeTerre,
+        res:Semoule,
+        res:Tomate ;
+    gt:difficulte "Difficile" ;
+    gt:epiceUtilisee res:Carvi,
+        res:Harissa ;
+    gt:estVegetarien false ;
+    gt:ingredientPrincipal res:Semoule ;
+    gt:nombrePersonnes 8 ;
+    gt:originaireDe res:Tunis ;
+    gt:tempsPreparation 150 ;
+    dcterms:description "Couscous traditionnel à l'agneau et aux légumes."@fr ;
+    rdfs:seeAlso dbr:Couscous .
+
+res:HediJaziri a gt:Chef,
+        foaf:Person ;
+    gt:specialite res:Brik,
+        res:Lablabi,
+        res:Ojja ;
+    foaf:based_near res:Tunis ;
+    foaf:name "Hédi Jaziri" .
+
+res:Kafteji a gt:Plat,
+        gt:PlatPrincipal ;
+    rdfs:label "كفتاجي"@ar,
+        "Kafteji"@fr ;
+    gt:contientIngredient res:Courgette,
+        res:Harissa,
+        res:Oeuf,
+        res:Poivron,
+        res:PommeDeTerre,
+        res:Tomate ;
+    gt:difficulte "Moyenne" ;
+    gt:epiceUtilisee res:Harissa ;
+    gt:estVegetarien true ;
+    gt:ingredientPrincipal res:Poivron ;
+    gt:nombrePersonnes 4 ;
+    gt:originaireDe res:Tunis ;
+    gt:tempsPreparation 45 ;
+    dcterms:description "Légumes frits hachés avec des œufs."@fr .
+
+res:Mloukhia a gt:Plat,
+        gt:PlatPrincipal ;
+    rdfs:label "ملوخية"@ar,
+        "Mloukhia"@fr ;
+    gt:contientIngredient res:Ail,
+        res:Boeuf,
+        res:Carvi,
+        res:Corete,
+        res:HuileOlive,
+        res:Tabel ;
+    gt:difficulte "Difficile" ;
+    gt:epiceUtilisee res:Carvi,
+        res:Tabel ;
+    gt:estVegetarien false ;
+    gt:ingredientPrincipal res:Corete ;
+    gt:nombrePersonnes 6 ;
+    gt:originaireDe res:Tunis ;
+    gt:tempsPreparation 240 ;
+    dcterms:description "Ragoût de bœuf à la poudre de corète, cuisson très longue."@fr .
+
+res:MounirGharbi a gt:Chef,
+        foaf:Person ;
+    gt:specialite res:RouzJerbi ;
+    foaf:based_near res:Medenine ;
+    foaf:name "Mounir Gharbi" .
+
+res:SoniaKaroui a gt:Chef,
+        foaf:Person ;
+    gt:specialite res:Chakchouka,
+        res:SaladeMechouia ;
+    foaf:based_near res:Nabeul ;
+    foaf:name "Sonia Karoui" .
+
+dcterms:description a rdf:Property ;
+    rdfs:label "description"@fr .
+
+foaf:based_near a rdf:Property ;
+    rdfs:label "basé près de"@fr .
+
+foaf:name a rdf:Property ;
+    rdfs:label "nom"@fr .
+
+res:Blette a gt:Ingredient,
+        gt:Legume ;
+    rdfs:label "Blette"@fr .
+
+res:Boeuf a gt:Ingredient,
+        gt:Viande ;
+    rdfs:label "Bœuf"@fr .
+
+res:Brik a gt:Entree,
+        gt:Plat ;
+    rdfs:label "بريك"@ar,
+        "Brik à l'œuf"@fr ;
+    gt:contientIngredient res:Capres,
+        res:FeuilleBrik,
+        res:Oeuf,
+        res:Persil,
+        res:Thon ;
+    gt:difficulte "Facile" ;
+    gt:estVegetarien false ;
+    gt:ingredientPrincipal res:FeuilleBrik ;
+    gt:nombrePersonnes 4 ;
+    gt:originaireDe res:Tunis ;
+    gt:tempsPreparation 20 ;
+    dcterms:description "Feuille croustillante farcie à l'œuf, au thon et aux câpres."@fr ;
+    rdfs:seeAlso dbr:Brik .
+
+res:Capres a gt:Ingredient ;
+    rdfs:label "Câpres"@fr .
+
+res:Chakchouka a gt:Plat,
+        gt:PlatPrincipal ;
+    rdfs:label "شكشوكة"@ar,
+        "Chakchouka"@fr ;
+    gt:contientIngredient res:Harissa,
+        res:HuileOlive,
+        res:Oeuf,
+        res:Oignon,
+        res:Poivron,
+        res:Tomate ;
+    gt:difficulte "Facile" ;
+    gt:epiceUtilisee res:Harissa ;
+    gt:estVegetarien true ;
+    gt:ingredientPrincipal res:Poivron ;
+    gt:nombrePersonnes 4 ;
+    gt:originaireDe res:Nabeul ;
+    gt:tempsPreparation 35 ;
+    dcterms:description "Poivrons et tomates mijotés avec des œufs."@fr ;
+    rdfs:seeAlso dbr:Shakshouka .
+
+res:CouscousPoisson a gt:Plat,
+        gt:PlatPrincipal ;
+    rdfs:label "كسكسي بالحوت"@ar,
+        "Couscous au poisson"@fr ;
+    gt:contientIngredient res:Harissa,
+        res:HuileOlive,
+        res:Merou,
+        res:Oignon,
+        res:Semoule,
+        res:Tabel,
+        res:Tomate ;
+    gt:difficulte "Difficile" ;
+    gt:epiceUtilisee res:Harissa,
+        res:Tabel ;
+    gt:estVegetarien false ;
+    gt:ingredientPrincipal res:Semoule ;
+    gt:nombrePersonnes 6 ;
+    gt:originaireDe res:Sfax ;
+    gt:tempsPreparation 120 ;
+    dcterms:description "Couscous sfaxien au mérou, sauce tomate relevée."@fr ;
+    rdfs:seeAlso dbr:Couscous .
+
+res:Kairouan a gt:Region ;
+    rdfs:label "القيروان"@ar,
+        "Kairouan"@fr .
+
+res:Lablabi a gt:Entree,
+        gt:Plat,
+        gt:Soupe ;
+    rdfs:label "لبلابي"@ar,
+        "Lablabi"@fr ;
+    gt:contientIngredient res:Ail,
+        res:Cumin,
+        res:Harissa,
+        res:HuileOlive,
+        res:Pain,
+        res:PoisChiches ;
+    gt:difficulte "Facile" ;
+    gt:epiceUtilisee res:Cumin,
+        res:Harissa ;
+    gt:estVegetarien true ;
+    gt:ingredientPrincipal res:PoisChiches ;
+    gt:nombrePersonnes 4 ;
+    gt:originaireDe res:Tunis ;
+    gt:tempsPreparation 30 ;
+    dcterms:description "Soupe de pois chiches servie sur du pain, à l'ail et au cumin."@fr ;
+    rdfs:seeAlso dbr:Lablabi .
+
+res:Lait a gt:Ingredient ;
+    rdfs:label "Lait"@fr .
+
+res:Levure a gt:Ingredient ;
+    rdfs:label "Levure"@fr .
+
+res:Makroudh a gt:Dessert,
+        gt:Patisserie,
+        gt:Plat ;
+    rdfs:label "مقروض"@ar,
+        "Makroudh"@fr ;
+    gt:contientIngredient res:HuileOlive,
+        res:Miel,
+        res:PateDattes,
+        res:Semoule ;
+    gt:difficulte "Moyenne" ;
+    gt:estVegetarien true ;
+    gt:ingredientPrincipal res:Semoule ;
+    gt:nombrePersonnes 10 ;
+    gt:originaireDe res:Kairouan ;
+    gt:tempsPreparation 90 ;
+    dcterms:description "Losanges de semoule fourrés aux dattes et trempés dans le miel."@fr .
+
+res:Menthe a gt:Ingredient ;
+    rdfs:label "Menthe"@fr .
+
+res:Merguez a gt:Ingredient,
+        gt:Viande ;
+    rdfs:label "Merguez"@fr .
+
+res:Merou a gt:Ingredient,
+        gt:Poisson ;
+    rdfs:label "Mérou"@fr .
+
+res:Miel a gt:Ingredient ;
+    rdfs:label "Miel"@fr .
+
+res:Ojja a gt:Plat,
+        gt:PlatPrincipal ;
+    rdfs:label "عجة بالمرقاز"@ar,
+        "Ojja merguez"@fr ;
+    gt:contientIngredient res:Ail,
+        res:Carvi,
+        res:Harissa,
+        res:HuileOlive,
+        res:Merguez,
+        res:Oeuf,
+        res:Tomate ;
+    gt:difficulte "Facile" ;
+    gt:epiceUtilisee res:Carvi,
+        res:Harissa ;
+    gt:estVegetarien false ;
+    gt:ingredientPrincipal res:Oeuf ;
+    gt:nombrePersonnes 4 ;
+    gt:originaireDe res:Tunis ;
+    gt:tempsPreparation 30 ;
+    dcterms:description "Œufs pochés dans une sauce tomate pimentée avec des merguez."@fr .
+
+res:Pain a gt:Ingredient ;
+    rdfs:label "Pain rassis"@fr .
+
+res:PateDattes a gt:Ingredient ;
+    rdfs:label "Pâte de dattes"@fr .
+
+res:RouzJerbi a gt:Plat,
+        gt:PlatPrincipal ;
+    rdfs:label "روز جربي"@ar,
+        "Riz djerbien"@fr ;
+    gt:contientIngredient res:Agneau,
+        res:Blette,
+        res:Menthe,
+        res:Persil,
+        res:PoisChiches,
+        res:Riz,
+        res:Tabel ;
+    gt:difficulte "Moyenne" ;
+    gt:epiceUtilisee res:Tabel ;
+    gt:estVegetarien false ;
+    gt:ingredientPrincipal res:Riz ;
+    gt:nombrePersonnes 6 ;
+    gt:originaireDe res:Medenine ;
+    gt:tempsPreparation 90 ;
+    dcterms:description "Riz cuit à la vapeur avec agneau, blettes et herbes."@fr .
+
+res:SaladeMechouia a gt:Entree,
+        gt:Plat ;
+    rdfs:label "سلطة مشوية"@ar,
+        "Salade méchouia"@fr ;
+    gt:contientIngredient res:Ail,
+        res:Carvi,
+        res:HuileOlive,
+        res:Poivron,
+        res:Tomate ;
+    gt:difficulte "Facile" ;
+    gt:epiceUtilisee res:Carvi ;
+    gt:estVegetarien true ;
+    gt:ingredientPrincipal res:Poivron ;
+    gt:nombrePersonnes 4 ;
+    gt:originaireDe res:Nabeul ;
+    gt:tempsPreparation 40 ;
+    dcterms:description "Poivrons et tomates grillés, écrasés à l'ail et à l'huile d'olive."@fr .
+
+res:Thon a gt:Ingredient,
+        gt:Poisson ;
+    rdfs:label "Thon"@fr .
+
+gt:contientIngredient a rdf:Property ;
+    rdfs:label "contient l'ingrédient"@fr ;
+    rdfs:domain gt:Plat ;
+    rdfs:range gt:Ingredient .
+
+res:Corete a gt:Ingredient,
+        gt:Legume ;
+    rdfs:label "Corète (poudre de mloukhia)"@fr .
+
+res:Courgette a gt:Ingredient,
+        gt:Legume ;
+    rdfs:label "Courgette"@fr .
+
+res:Cumin a gt:Epice,
+        gt:Ingredient ;
+    rdfs:label "Cumin"@fr .
+
+res:FeuilleBrik a gt:Ingredient ;
+    rdfs:label "Feuille de brik (malsouka)"@fr .
+
+res:Frik a gt:Cereale,
+        gt:Ingredient ;
+    rdfs:label "Frik (blé vert concassé)"@fr .
+
+res:Medenine a gt:Region ;
+    rdfs:label "مدنين"@ar,
+        "Médenine (Djerba)"@fr .
+
+res:Persil a gt:Ingredient ;
+    rdfs:label "Persil"@fr .
+
+res:PommeDeTerre a gt:Ingredient,
+        gt:Legume ;
+    rdfs:label "Pomme de terre"@fr .
+
+res:Riz a gt:Cereale,
+        gt:Ingredient ;
+    rdfs:label "Riz"@fr .
+
+res:Sfax a gt:Region ;
+    rdfs:label "صفاقس"@ar,
+        "Sfax"@fr .
+
+res:Sucre a gt:Ingredient ;
+    rdfs:label "Sucre"@fr .
+
+res:Zgougou a gt:Ingredient ;
+    rdfs:label "Zgougou (graines de pin d'Alep)"@fr .
+
+res:Agneau a gt:Ingredient,
+        gt:Viande ;
+    rdfs:label "Agneau"@fr .
+
+res:Farine a gt:Cereale,
+        gt:Ingredient ;
+    rdfs:label "Farine"@fr .
+
+res:Nabeul a gt:Region ;
+    rdfs:label "نابل"@ar,
+        "Nabeul"@fr .
+
+res:Oignon a gt:Ingredient,
+        gt:Legume ;
+    rdfs:label "Oignon"@fr .
+
+res:Ail a gt:Ingredient,
+        gt:Legume ;
+    rdfs:label "Ail"@fr .
+
+res:Oeuf a gt:Ingredient ;
+    rdfs:label "Œuf"@fr .
+
+res:PoisChiches a gt:Ingredient,
+        gt:Legume ;
+    rdfs:label "Pois chiches"@fr .
+
+res:Poivron a gt:Ingredient,
+        gt:Legume ;
+    rdfs:label "Poivron"@fr .
+
+res:Semoule a gt:Cereale,
+        gt:Ingredient ;
+    rdfs:label "Semoule"@fr .
+
+res:HuileOlive a gt:Ingredient ;
+    rdfs:label "Huile d'olive"@fr .
+
+res:Tomate a gt:Ingredient,
+        gt:Legume ;
+    rdfs:label "Tomate"@fr .
+
+res:Carvi a gt:Epice,
+        gt:Ingredient ;
+    rdfs:label "Carvi (karouia)"@fr .
+
+res:Tabel a gt:Epice,
+        gt:Ingredient ;
+    rdfs:label "Tabel (coriandre en poudre)"@fr .
+
+res:Tunis a gt:Region ;
+    rdfs:label "تونس"@ar,
+        "Tunis"@fr .
+
+res:Harissa a gt:Epice,
+        gt:Ingredient ;
+    rdfs:label "Harissa"@fr .
+

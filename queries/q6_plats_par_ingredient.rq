@@ -1,0 +1,19 @@
+# Q6 — Plats contenant un ingrédient donné
+# Question métier : J'ai des œufs : quels plats puis-je préparer ?
+# Notions SPARQL : VALUES (paramètre), propriété gt:contientIngredient
+# Effet de l'inférence : pour l'Ojja, l'œuf est écrit avec gt:ingredientPrincipal (et non gt:contientIngredient). Sans inférence : 3 plats. Avec la règle rdfs7 (subPropertyOf) : 4 plats, l'Ojja apparaît.
+# Paramètre : ?ingredient (res:Oeuf par défaut). L'API remplace cette valeur par /api/ingredients/<id>/plats.
+
+PREFIX gt:   <http://example.org/gastronomie-tn/ontologie#>
+PREFIX res:  <http://example.org/gastronomie-tn/ressource/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?plat ?nom ?nomIngredient
+WHERE {
+  VALUES ?ingredient { res:Oeuf }
+  ?plat gt:contientIngredient ?ingredient ;
+        rdfs:label ?nom .
+  ?ingredient rdfs:label ?nomIngredient .
+  FILTER (lang(?nom) = "fr")
+}
+ORDER BY ?nom

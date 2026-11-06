@@ -1,0 +1,46 @@
+flowchart TB
+  subgraph P1["PARTIE 1 — MODÉLISER : RDF + RDFS"]
+    direction LR
+    O["data/ontologie.ttl<br/><b>vocabulaire RDFS</b><br/>14 classes · 9 propriétés<br/>subClassOf · subPropertyOf · domain · range"]
+    D["data/donnees.ttl<br/><b>instances RDF</b><br/>14 plats · 35 ingrédients · 5 régions · 4 chefs"]
+    V["src/verifier_modele.py<br/>contrôle schéma ↔ données"]
+    G0[("Graphe initial<br/>401 triplets")]
+    O --> G0
+    D --> G0
+    V -. vérifie .-> G0
+  end
+
+  subgraph P2["PARTIE 2 — INTERROGER : SPARQL"]
+    direction LR
+    Q["queries/q1 … q8.rq<br/>8 questions métier<br/>(source unique des requêtes)"]
+    E["src/executer_requetes.py"]
+    R2["docs/resultats_sparql.md"]
+    Q --> E --> R2
+  end
+
+  subgraph P3["PARTIE 3 — ENRICHIR : INFÉRENCE RDFS"]
+    direction LR
+    I["src/inference.py<br/>moteur owlrl<br/>règles rdfs2 · rdfs3 · rdfs7 · rdfs9 · rdfs11"]
+    G1[("Graphe inféré<br/>481 triplets (+80)<br/>data/graphe_infere.ttl")]
+    R3["docs/comparaison_inference.md<br/>8 requêtes : sans / avec"]
+    I --> G1
+    I --> R3
+  end
+
+  subgraph P4["PARTIE 4 — EXPOSER : WEB SERVICE REST / JSON"]
+    direction LR
+    S["src/api/sparql.py<br/>exécute queries/*.rq<br/>résultat → JSON"]
+    A["src/api/app.py<br/>Flask · 9 endpoints GET<br/>?inference=true|false"]
+    W["src/api/openapi.yaml<br/>Swagger UI → /docs"]
+    T["tests/test_api.py<br/>pytest · 33 tests"]
+    S --> A
+    W --> A
+    T -. teste .-> A
+  end
+
+  C["Client HTTP<br/>Swagger UI · navigateur · curl"]
+
+  P1 == "graphe initial" ==> P2
+  P2 == "mêmes requêtes" ==> P3
+  P3 == "graphe initial + graphe inféré" ==> P4
+  P4 == "réponses JSON" ==> C

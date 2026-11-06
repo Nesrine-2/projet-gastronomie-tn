@@ -1,0 +1,446 @@
+openapi: 3.0.3
+info:
+  title: API Gastronomie tunisienne
+  version: "1.0"
+  description: |
+    Web Service REST qui expose en JSON les résultats de requêtes SPARQL
+    exécutées sur un graphe RDF de la gastronomie tunisienne.
+
+    **Fonctionnement** : au démarrage, le serveur charge `data/ontologie.ttl` et
+    `data/donnees.ttl` (graphe initial, 401 triplets), puis applique l'inférence RDFS
+    (graphe inféré, 481 triplets). Chaque endpoint exécute un fichier du dossier
+    `queries/` et renvoie le résultat en JSON.
+
+    **Paramètre commun `inference`** : `true` (défaut) interroge le graphe inféré,
+    `false` interroge le graphe initial. Il permet de comparer en direct l'effet de
+    l'inférence (ex. `GET /api/plats` : 14 plats avec inférence, 0 sans).
+
+    **Pour tester** : ouvrir un endpoint → *Try it out* → remplir les paramètres → *Execute*.
+servers:
+  - url: http://127.0.0.1:5000
+    description: Serveur local (python src/api/app.py)
+
+tags:
+  - name: Plats
+  - name: Ingrédients
+  - name: Régions et chefs
+  - name: Inférence
+
+paths:
+  /api/plats:
+    get:
+      tags: [Plats]
+      summary: Catalogue des plats (requête Q3)
+      description: |
+        Exécute `queries/q3_tous_les_plats.rq`. La requête cherche les instances de
+        `gt:Plat` (ou de la catégorie demandée). Aucun plat n'est typé directement
+        `gt:Plat` dans les données : **sans inférence, le résultat est vide** ; avec
+        la règle rdfs9 (héritage du type par `rdfs:subClassOf`), les 14 plats apparaissent.
+      parameters:
+        - name: categorie
+          in: query
+          required: false
+          description: Classe de plats à lister (gt:Plat et ses sous-classes).
+          schema:
+            type: string
+            enum: [Plat, Entree, Soupe, PlatPrincipal, Dessert, Patisserie]
+            default: Plat
+        - $ref: "#/components/parameters/Inference"
+      responses:
+        "200":
+          description: Liste des plats.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Liste"
+              example:
+                requete: queries/q3_tous_les_plats.rq
+                inference: true
+                parametres: {categorie: Dessert}
+                nombre: 3
+                resultats:
+                  - {plat: AssidaZgougou, nom: Assidat zgougou, categorie: Dessert, region: Tunis, tempsPreparation: 180, estVegetarien: true}
+                  - {plat: Bambalouni, nom: Bambalouni, categorie: Pâtisserie, region: Tunis, tempsPreparation: 120, estVegetarien: true}
+        "400":
+          $ref: "#/components/responses/ParametreInvalide"
+
+  /api/plats/{id}:
+    get:
+      tags: [Plats]
+      summary: Détail d'un plat
+      description: |
+        Exécute `queries/api/detail_plat.rq`, `queries/api/ingredients_plat.rq` et
+        `queries/api/chefs_plat.rq`. Avec inférence, la liste `ingredients` contient
+        aussi l'ingrédient principal et les épices (règle rdfs7, `rdfs:subPropertyOf`).
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Identifiant du plat (fin de l'URI res:...).
+          schema:
+            type: string
+            example: Ojja
+        - $ref: "#/components/parameters/Inference"
+      responses:
+        "200":
+          description: Détail du plat.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DetailPlat"
+              example:
+                id: Ojja
+                inference: true
+                nom: Ojja merguez
+                nomArabe: عجة بالمرقاز
+                categorie: Plat principal
+                description: Œufs pochés dans une sauce tomate pimentée avec des merguez.
+                region: Tunis
+                tempsPreparation: 30
+                nombrePersonnes: 4
+                difficulte: Facile
+                estVegetarien: false
+                lienDBpedia: null
+                ingredientPrincipal: Œuf
+                epices: [Carvi (karouia), Harissa]
+                ingredients:
+                  - {id: Oeuf, nom: Œuf}
+                  - {id: Ail, nom: Ail}
+                  - {id: Carvi, nom: Carvi (karouia)}
+                  - {id: Harissa, nom: Harissa}
+                  - {id: HuileOlive, nom: Huile d'olive}
+                  - {id: Merguez, nom: Merguez}
+                  - {id: Tomate, nom: Tomate}
+                chefs:
+                  - {id: HediJaziri, nom: Hédi Jaziri}
+        "400":
+          $ref: "#/components/responses/ParametreInvalide"
+        "404":
+          $ref: "#/components/responses/Introuvable"
+
+  /api/plats/vegetariens:
+    get:
+      tags: [Plats]
+      summary: Plats végétariens rapides (requête Q2)
+      description: Exécute `queries/q2_vegetariens_rapides.rq` avec `?max` = `max_temps`.
+      parameters:
+        - name: max_temps
+          in: query
+          required: false
+          description: Temps de préparation maximum, en minutes.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+            default: 45
+        - $ref: "#/components/parameters/Inference"
+      responses:
+        "200":
+          description: Plats végétariens dont le temps est inférieur ou égal à max_temps.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Liste"
+              example:
+                requete: queries/q2_vegetariens_rapides.rq
+                inference: true
+                parametres: {max_temps: 45}
+                nombre: 4
+                resultats:
+                  - {plat: Lablabi, nom: Lablabi, tempsPreparation: 30, description: "Soupe de pois chiches servie sur du pain, à l'ail et au cumin."}
+                  - {plat: Chakchouka, nom: Chakchouka, tempsPreparation: 35, description: Poivrons et tomates mijotés avec des œufs.}
+        "400":
+          $ref: "#/components/responses/ParametreInvalide"
+
+  /api/plats/sans-chef:
+    get:
+      tags: [Plats]
+      summary: Plats sans chef associé (requête Q8)
+      description: Exécute `queries/q8_plats_sans_chef.rq` (négation `FILTER NOT EXISTS`).
+      parameters:
+        - $ref: "#/components/parameters/Inference"
+      responses:
+        "200":
+          description: Plats qu'aucun chef n'a en spécialité.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Liste"
+              example:
+                requete: queries/q8_plats_sans_chef.rq
+                inference: true
+                nombre: 6
+                resultats:
+                  - {plat: AssidaZgougou, nom: Assidat zgougou, lienDBpedia: null}
+                  - {plat: Bambalouni, nom: Bambalouni, lienDBpedia: null}
+        "400":
+          $ref: "#/components/responses/ParametreInvalide"
+
+  /api/ingredients/{id}/plats:
+    get:
+      tags: [Ingrédients]
+      summary: Plats contenant un ingrédient (requête Q6)
+      description: |
+        Exécute `queries/q6_plats_par_ingredient.rq` avec `?ingredient` = `res:{id}`.
+        Exemple à montrer : `Oeuf` → 4 plats avec inférence, 3 sans (l'Ojja n'apparaît
+        qu'avec la règle rdfs7).
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Identifiant de l'ingrédient (Oeuf, Harissa, Tomate, Semoule...).
+          schema:
+            type: string
+            example: Oeuf
+        - $ref: "#/components/parameters/Inference"
+      responses:
+        "200":
+          description: Plats qui contiennent cet ingrédient.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Liste"
+              example:
+                requete: queries/q6_plats_par_ingredient.rq
+                inference: true
+                parametres: {ingredient: Oeuf, nom: Œuf}
+                nombre: 4
+                resultats:
+                  - {plat: Brik, nom: Brik à l'œuf, nomIngredient: Œuf}
+                  - {plat: Chakchouka, nom: Chakchouka, nomIngredient: Œuf}
+        "400":
+          $ref: "#/components/responses/ParametreInvalide"
+        "404":
+          $ref: "#/components/responses/Introuvable"
+
+  /api/ingredients/frequents:
+    get:
+      tags: [Ingrédients]
+      summary: Ingrédients les plus utilisés (requête Q7)
+      description: Exécute `queries/q7_ingredients_frequents.rq` avec `?min` = `min` (GROUP BY + HAVING).
+      parameters:
+        - name: min
+          in: query
+          required: false
+          description: Nombre minimum de plats utilisant l'ingrédient.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 3
+        - $ref: "#/components/parameters/Inference"
+      responses:
+        "200":
+          description: Ingrédients utilisés dans au moins `min` plats.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Liste"
+              example:
+                requete: queries/q7_ingredients_frequents.rq
+                inference: true
+                parametres: {min: 3}
+                nombre: 12
+                resultats:
+                  - {ingredient: Harissa, nom: Harissa, nbPlats: 7}
+                  - {ingredient: HuileOlive, nom: Huile d'olive, nbPlats: 7}
+        "400":
+          $ref: "#/components/responses/ParametreInvalide"
+
+  /api/regions/stats:
+    get:
+      tags: [Régions et chefs]
+      summary: Statistiques par région (requête Q4)
+      description: Exécute `queries/q4_stats_par_region.rq` (GROUP BY, COUNT, AVG).
+      parameters:
+        - $ref: "#/components/parameters/Inference"
+      responses:
+        "200":
+          description: Nombre de plats, temps moyen et nombre de plats végétariens par région.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Liste"
+              example:
+                requete: queries/q4_stats_par_region.rq
+                inference: true
+                nombre: 5
+                resultats:
+                  - {region: Tunis, nom: Tunis, nbPlats: 9, tempsMoyen: 97, nbVegetariens: 4}
+                  - {region: Nabeul, nom: Nabeul, nbPlats: 2, tempsMoyen: 38, nbVegetariens: 2}
+        "400":
+          $ref: "#/components/responses/ParametreInvalide"
+
+  /api/chefs:
+    get:
+      tags: [Régions et chefs]
+      summary: Chefs et leurs spécialités (requête Q5)
+      description: |
+        Exécute `queries/q5_chefs_specialites.rq`, qui cherche les ressources de type
+        `gt:Chef`. Dans les données, les chefs sont seulement des `foaf:Person` :
+        **sans inférence, le résultat est vide** ; avec la règle rdfs2
+        (`rdfs:domain` de `gt:specialite`), les 4 chefs apparaissent.
+      parameters:
+        - $ref: "#/components/parameters/Inference"
+      responses:
+        "200":
+          description: Chefs, ville, spécialités et nombre de plats de leur région.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Liste"
+              example:
+                requete: queries/q5_chefs_specialites.rq
+                inference: true
+                nombre: 4
+                resultats:
+                  - {chef: HediJaziri, nom: Hédi Jaziri, ville: Tunis, specialites: [Brik à l'œuf, Lablabi, Ojja merguez], nbSpecialites: 3, nbPlatsLocaux: 3}
+                  - {chef: AmiraBenSalem, nom: Amira Ben Salem, ville: Sfax, specialites: [Couscous au poisson, Makroudh], nbSpecialites: 2, nbPlatsLocaux: 1}
+        "400":
+          $ref: "#/components/responses/ParametreInvalide"
+
+  /api/inference/comparaison:
+    get:
+      tags: [Inférence]
+      summary: Comparaison des 8 requêtes sans / avec inférence
+      description: |
+        Exécute les 8 requêtes `queries/q1..q8` sur le graphe initial puis sur le
+        graphe inféré et renvoie le nombre de résultats de chacune.
+      responses:
+        "200":
+          description: Nombre de triplets et de résultats, sans et avec inférence.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Comparaison"
+              example:
+                triplets: {sansInference: 401, avecInference: 481, deduits: 80}
+                requetes:
+                  - requete: Q3
+                    fichier: queries/q3_tous_les_plats.rq
+                    titre: Catalogue complet des plats (instances de la super-classe gt:Plat)
+                    sansInference: 0
+                    avecInference: 14
+                    change: true
+                    explication: "Aucun plat n'est typé directement gt:Plat dans les données. Sans inférence : 0 résultat. Avec la règle rdfs9 (héritage du type par subClassOf) : les 14 plats."
+
+components:
+  parameters:
+    Inference:
+      name: inference
+      in: query
+      required: false
+      description: "true : graphe inféré (défaut). false : graphe initial, sans inférence."
+      schema:
+        type: string
+        enum: ["true", "false"]
+        default: "true"
+
+  responses:
+    ParametreInvalide:
+      description: Paramètre invalide (code 400).
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Erreur"
+          example:
+            erreur: {code: 400, message: "Le paramètre 'max_temps' doit être un entier entre 1 et 1000 (reçu : 'abc')."}
+    Introuvable:
+      description: Ressource introuvable (code 404).
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Erreur"
+          example:
+            erreur: {code: 404, message: "Plat 'Pizza' introuvable."}
+
+  schemas:
+    Liste:
+      type: object
+      description: Format commun des réponses qui renvoient une liste.
+      properties:
+        requete:
+          type: string
+          description: Fichier SPARQL exécuté.
+        inference:
+          type: boolean
+          description: true si le graphe inféré a été interrogé.
+        parametres:
+          type: object
+          description: Paramètres effectivement utilisés.
+          additionalProperties: true
+        nombre:
+          type: integer
+          description: Nombre de résultats.
+        resultats:
+          type: array
+          description: Une ligne de résultat SPARQL = un objet JSON (une clé par variable).
+          items:
+            type: object
+            additionalProperties: true
+      required: [requete, inference, nombre, resultats]
+
+    DetailPlat:
+      type: object
+      properties:
+        id: {type: string}
+        inference: {type: boolean}
+        nom: {type: string}
+        nomArabe: {type: string, nullable: true}
+        categorie: {type: string, nullable: true}
+        description: {type: string, nullable: true}
+        region: {type: string}
+        tempsPreparation: {type: integer}
+        nombrePersonnes: {type: integer}
+        difficulte: {type: string}
+        estVegetarien: {type: boolean}
+        lienDBpedia: {type: string, nullable: true}
+        ingredientPrincipal: {type: string, nullable: true}
+        epices:
+          type: array
+          items: {type: string}
+        ingredients:
+          type: array
+          items:
+            type: object
+            properties:
+              id: {type: string}
+              nom: {type: string}
+        chefs:
+          type: array
+          items:
+            type: object
+            properties:
+              id: {type: string}
+              nom: {type: string}
+
+    Comparaison:
+      type: object
+      properties:
+        triplets:
+          type: object
+          properties:
+            sansInference: {type: integer}
+            avecInference: {type: integer}
+            deduits: {type: integer}
+        requetes:
+          type: array
+          items:
+            type: object
+            properties:
+              requete: {type: string}
+              fichier: {type: string}
+              titre: {type: string}
+              sansInference: {type: integer}
+              avecInference: {type: integer}
+              change: {type: boolean}
+              explication: {type: string}
+
+    Erreur:
+      type: object
+      properties:
+        erreur:
+          type: object
+          properties:
+            code: {type: integer}
+            message: {type: string}

@@ -1,0 +1,17 @@
+# API — Ingrédients d'un plat (utilisée par GET /api/plats/{id})
+# Avec inférence, gt:contientIngredient renvoie AUSSI l'ingrédient principal et les épices (rdfs7).
+# Paramètre : ?plat (res:Ojja par défaut)
+
+PREFIX gt:   <http://example.org/gastronomie-tn/ontologie#>
+PREFIX res:  <http://example.org/gastronomie-tn/ressource/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?ingredient ?nom ?estPrincipal ?estEpice
+WHERE {
+  VALUES ?plat { res:Ojja }
+  ?plat gt:contientIngredient ?ingredient .
+  ?ingredient rdfs:label ?nom .
+  BIND (EXISTS { ?plat gt:ingredientPrincipal ?ingredient } AS ?estPrincipal)
+  BIND (EXISTS { ?ingredient a gt:Epice } AS ?estEpice)
+}
+ORDER BY DESC(?estPrincipal) ?nom

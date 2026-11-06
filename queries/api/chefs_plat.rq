@@ -1,0 +1,14 @@
+# API — Chefs ayant un plat en spécialité (utilisée par GET /api/plats/{id})
+# Paramètre : ?plat (res:Ojja par défaut)
+
+PREFIX gt:   <http://example.org/gastronomie-tn/ontologie#>
+PREFIX res:  <http://example.org/gastronomie-tn/ressource/>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+
+SELECT ?chef ?nom
+WHERE {
+  VALUES ?plat { res:Ojja }
+  ?chef gt:specialite ?plat ;
+        foaf:name ?nom .
+}
+ORDER BY ?nom

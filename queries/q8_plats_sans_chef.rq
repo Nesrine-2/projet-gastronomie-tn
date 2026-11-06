@@ -1,0 +1,17 @@
+# Q8 — Plats qu'aucun chef n'a en spécialité, avec leur lien DBpedia éventuel
+# Question métier : Quels plats ne sont mis en avant par aucun chef (idée : recruter un chef pour ces plats) ?
+# Notions SPARQL : négation FILTER NOT EXISTS, OPTIONAL, lien externe DBpedia (rdfs:seeAlso)
+# Effet de l'inférence : aucun. On repère les plats par gt:originaireDe (présent sur tous les plats) pour obtenir le même résultat avec ou sans inférence.
+
+PREFIX gt:   <http://example.org/gastronomie-tn/ontologie#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?plat ?nom ?lienDBpedia
+WHERE {
+  ?plat gt:originaireDe ?region ;
+        rdfs:label ?nom .
+  FILTER (lang(?nom) = "fr")
+  FILTER NOT EXISTS { ?chef gt:specialite ?plat }
+  OPTIONAL { ?plat rdfs:seeAlso ?lienDBpedia }
+}
+ORDER BY ?nom

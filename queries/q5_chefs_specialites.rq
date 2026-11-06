@@ -1,0 +1,25 @@
+# Q5 — Chefs, leur ville, leurs spécialités et combien sont des plats de leur région
+# Question métier : Quels chefs mettent en avant la cuisine de leur propre région ?
+# Notions SPARQL : vocabulaire FOAF, GROUP_CONCAT, COUNT, SUM + IF, GROUP BY
+# Effet de l'inférence : dans les données, les chefs sont seulement des foaf:Person. Sans inférence : 0 résultat. Avec la règle rdfs2 (rdfs:domain de gt:specialite = gt:Chef) : les 4 chefs.
+
+PREFIX gt:   <http://example.org/gastronomie-tn/ontologie#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+
+SELECT ?chef ?nom ?ville
+       (GROUP_CONCAT(?nomPlat; separator=", ") AS ?specialites)
+       (COUNT(?plat) AS ?nbSpecialites)
+       (SUM(IF(?origine = ?r, 1, 0)) AS ?nbPlatsLocaux)
+WHERE {
+  ?chef a gt:Chef ;
+        foaf:name ?nom ;
+        foaf:based_near ?r ;
+        gt:specialite ?plat .
+  ?r rdfs:label ?ville .
+  ?plat rdfs:label ?nomPlat ;
+        gt:originaireDe ?origine .
+  FILTER (lang(?ville) = "fr" && lang(?nomPlat) = "fr")
+}
+GROUP BY ?chef ?nom ?ville
+ORDER BY DESC(?nbSpecialites) ?nom

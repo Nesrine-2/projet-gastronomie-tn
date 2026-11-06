@@ -1,0 +1,28 @@
+# Q3 — Catalogue complet des plats (instances de la super-classe gt:Plat)
+# Question métier : Quel est le catalogue complet des plats, toutes catégories confondues ?
+# Notions SPARQL : rdf:type sur une super-classe, VALUES (paramètre), chemin de propriété rdfs:subClassOf*, FILTER NOT EXISTS
+# Effet de l'inférence : aucun plat n'est typé directement gt:Plat dans les données. Sans inférence : 0 résultat. Avec la règle rdfs9 (héritage du type par subClassOf) : les 14 plats.
+# Paramètre : ?classe (gt:Plat par défaut). L'API remplace cette valeur par ?categorie=Dessert, Soupe...
+# ?categorie = la classe la plus précise du plat (ex. Lablabi -> "Soupe" et non "Entrée" ou "Plat").
+
+PREFIX gt:   <http://example.org/gastronomie-tn/ontologie#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?plat ?nom ?categorie ?region ?tempsPreparation ?estVegetarien
+WHERE {
+  VALUES ?classe { gt:Plat }
+  ?plat a ?classe ;
+        rdfs:label ?nom ;
+        gt:originaireDe ?r ;
+        gt:tempsPreparation ?tempsPreparation ;
+        gt:estVegetarien ?estVegetarien .
+  ?r rdfs:label ?region .
+  FILTER (lang(?nom) = "fr" && lang(?region) = "fr")
+
+  # Classe la plus précise : une classe de plat dont le plat n'a aucune sous-classe plus précise
+  ?plat a ?cat .
+  ?cat rdfs:subClassOf* gt:Plat ;
+       rdfs:label ?categorie .
+  FILTER NOT EXISTS { ?plat a ?sous . ?sous rdfs:subClassOf ?cat . FILTER (?sous != ?cat) }
+}
+ORDER BY ?nom

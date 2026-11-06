@@ -1,0 +1,19 @@
+# Q1 — Plats principaux avec leur région, leur temps et leur difficulté
+# Question métier : Quels plats principaux propose-t-on, d'où viennent-ils et combien de temps faut-il pour les préparer ?
+# Notions SPARQL : motif de triplets, FILTER sur la langue (lang), ORDER BY
+# Effet de l'inférence : aucun (les plats sont déjà typés gt:PlatPrincipal dans les données).
+
+PREFIX gt:   <http://example.org/gastronomie-tn/ontologie#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?plat ?nom ?region ?tempsPreparation ?difficulte
+WHERE {
+  ?plat a gt:PlatPrincipal ;
+        rdfs:label ?nom ;
+        gt:originaireDe ?r ;
+        gt:tempsPreparation ?tempsPreparation ;
+        gt:difficulte ?difficulte .
+  ?r rdfs:label ?region .
+  FILTER (lang(?nom) = "fr" && lang(?region) = "fr")
+}
+ORDER BY ?tempsPreparation

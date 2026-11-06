@@ -1,0 +1,30 @@
+# API — Détail d'un plat (utilisée par GET /api/plats/{id})
+# Paramètre : ?plat (res:Ojja par défaut)
+
+PREFIX gt:      <http://example.org/gastronomie-tn/ontologie#>
+PREFIX res:     <http://example.org/gastronomie-tn/ressource/>
+PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+
+SELECT ?nom ?nomArabe ?categorie ?description ?region ?tempsPreparation
+       ?nombrePersonnes ?difficulte ?estVegetarien ?lienDBpedia
+WHERE {
+  VALUES ?plat { res:Ojja }
+  ?plat rdfs:label ?nom ;
+        gt:originaireDe ?r ;
+        gt:tempsPreparation ?tempsPreparation ;
+        gt:nombrePersonnes ?nombrePersonnes ;
+        gt:difficulte ?difficulte ;
+        gt:estVegetarien ?estVegetarien .
+  ?r rdfs:label ?region .
+  FILTER (lang(?nom) = "fr" && lang(?region) = "fr")
+  OPTIONAL { ?plat rdfs:label ?nomArabe . FILTER (lang(?nomArabe) = "ar") }
+  OPTIONAL { ?plat dcterms:description ?description }
+  OPTIONAL { ?plat rdfs:seeAlso ?lienDBpedia }
+  OPTIONAL {
+    ?plat a ?cat .
+    ?cat rdfs:subClassOf* gt:Plat ;
+         rdfs:label ?categorie .
+    FILTER NOT EXISTS { ?plat a ?sous . ?sous rdfs:subClassOf ?cat . FILTER (?sous != ?cat) }
+  }
+}
